@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import Query
 from app.services.graph_processor import (get_graph_data_as_json)
 from app.services.coupling_metrics_calculator import (
-    calculate_ais, calculate_all_ais)
+    calculate_ais, calculate_all_ais, calculate_ads, calculate_all_ads)
 
 router = APIRouter()
 
@@ -23,6 +23,21 @@ async def get_absolute_importance_of_a_service(service: Optional[str] = Query(No
     except Exception as e:
         return {"status": "error", "message": f"Failed to fetch graph: {str(e)}"}
 
+@router.get("/absolute-dependence-of")
+async def get_absolute_dependence_of_a_service(service: Optional[str] = Query(None)):
+    """
+    Endpoint to process the absolute dependence of a service.
+    """
+    try:
+        graph_data = get_graph_data_as_json()
+        if service is not None:
+            ads = calculate_ads(service, graph_data)
+            return {"status": "success", "data": ads}
+        else:
+            all_ads = calculate_all_ads(graph_data)
+            return {"status": "success", "data": all_ads}
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to fetch graph: {str(e)}"}
 
 @router.get("/")
 async def coupling_health():
