@@ -101,3 +101,29 @@ def calculate_adcs(graph_data):
     # Compute the average ADS (ADCS)
     adcs = total_ads / len(services) if services else 0
     return adcs
+
+def calculate_scf(graph_data):
+    """
+    Calculate the Service Coupling Factor (SCF).
+    
+    :param graph_data: Graph data in the described format (dict).
+    :return: SCF value (float).
+    """
+    if "graph" not in graph_data or "nodes" not in graph_data or "links" not in graph_data:
+        raise ValueError("Invalid graph data format.")
+    
+    nodes = graph_data["nodes"]
+    links = graph_data["links"]
+    
+    # Total number of services (nodes)
+    num_services = len(nodes)
+    
+    # Sum of all dependencies (edges in the graph)
+    sc = len(links)  # Each link represents a dependency
+    
+    # Maximum possible directed edges (N^2 - N)
+    max_edges = num_services ** 2 - num_services
+    
+    # Calculate SCF
+    scf = sc / max_edges if max_edges > 0 else 0
+    return scf
