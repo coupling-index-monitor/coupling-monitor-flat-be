@@ -85,6 +85,23 @@ def fetch_graph_from_neo4j():
 
     return graph
 
+def fetch_unique_services_from_neo4j():
+    """
+    Fetch the unique services from Neo4j and return them as a list.
+    """
+    services = set()
+    try:
+        with db_manager.neo4j_driver.session() as session:
+            result = session.run("""
+                MATCH (s:Service)
+                RETURN DISTINCT s.name AS service
+            """)
+            for record in result:
+                services.add(record["service"])
+    except Exception as e:
+        print(f"Error fetching unique services from Neo4j: {e}")
+    return list(services)
+
 
 def get_graph_data_as_json():
     """

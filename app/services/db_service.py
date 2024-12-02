@@ -64,5 +64,5 @@ def get_traces_by_parent_service(parent_service_name):
         return []
 
 
-def get_all_services():
+def get_active_services_of_jaeger():
     return fetch_services()
