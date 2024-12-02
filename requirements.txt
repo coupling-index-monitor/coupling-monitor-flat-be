@@ -1,0 +1,10 @@
+# Python dependencies
+fastapi~=0.115.5
+pymongo~=4.10.1
+neo4j~=5.26.0
+pydantic~=2.10.1
+requests~=2.32.3
+networkx~=3.4.2
+python-dotenv~=1.0.1
+APScheduler~=3.10.4
+certifi~=2024.8.30
