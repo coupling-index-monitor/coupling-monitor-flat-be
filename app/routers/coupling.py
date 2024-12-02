@@ -3,9 +3,20 @@ from typing import Optional
 from fastapi import Query
 from app.services.graph_processor import (get_graph_data_as_json)
 from app.services.coupling_metrics_calculator import (
-    calculate_ais, calculate_all_ais, calculate_ads, calculate_all_ads)
+    calculate_ais, calculate_all_ais, calculate_ads, calculate_all_ads, calculate_adcs)
 
 router = APIRouter()
+
+@router.get("/")
+async def coupling_health():
+    """
+    Endpoint to fetch the dependency graph as JSON data.
+    """
+    try:
+        graph_data = get_graph_data_as_json()
+        return {"status": "success", "graph": graph_data}
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to fetch graph: {str(e)}"}
 
 @router.get("/absolute-importance-of")
 async def get_absolute_importance_of_a_service(service: Optional[str] = Query(None)):
@@ -39,13 +50,14 @@ async def get_absolute_dependence_of_a_service(service: Optional[str] = Query(No
     except Exception as e:
         return {"status": "error", "message": f"Failed to fetch graph: {str(e)}"}
 
-@router.get("/")
-async def coupling_health():
+@router.get("/average-absolute-dependence")
+async def get_average_absolute_dependence():
     """
-    Endpoint to fetch the dependency graph as JSON data.
+    Endpoint to process the average absolute dependence of all services.
     """
     try:
         graph_data = get_graph_data_as_json()
-        return {"status": "success", "graph": graph_data}
+        avg_ads = calculate_adcs(graph_data)
+        return {"status": "success", "data": avg_ads}
     except Exception as e:
         return {"status": "error", "message": f"Failed to fetch graph: {str(e)}"}

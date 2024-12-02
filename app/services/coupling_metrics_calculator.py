@@ -79,3 +79,25 @@ def calculate_all_ads(graph_data):
     :return: Dictionary with service names as keys and their ADS values as values.
     """
     return calculate_for_all_services(graph_data, calculate_ads)
+
+def calculate_adcs(graph_data):
+    """
+    Calculate the Average Number of Directly Connected Services (ADCS).
+    
+    :param graph_data: Graph data in the described format (dict).
+    :return: ADCS value (float).
+    """
+    if "graph" == None or "nodes" not in graph_data:
+        raise ValueError("Invalid graph data format.")
+        
+    nodes = graph_data["nodes"]
+    services = [node["id"] for node in nodes]
+
+    # Compute ADS for all services
+    total_ads = 0
+    for service in services:
+        total_ads += calculate_ads(service, graph_data)
+
+    # Compute the average ADS (ADCS)
+    adcs = total_ads / len(services) if services else 0
+    return adcs
