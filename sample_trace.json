@@ -1,0 +1,392 @@
+{
+    "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+    "spans": [
+        {
+            "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+            "spanID": "9016af50612c992f",
+            "operationName": "http get /service-b/path1",
+            "references": [
+                {
+                    "refType": "CHILD_OF",
+                    "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+                    "spanID": "f0b22692b9603d99"
+                }
+            ],
+            "startTime": 1741865437876703,
+            "duration": 17946,
+            "tags": [
+                {
+                    "key": "exception",
+                    "type": "string",
+                    "value": "none"
+                },
+                {
+                    "key": "http.url",
+                    "type": "string",
+                    "value": "/service-b/path1"
+                },
+                {
+                    "key": "method",
+                    "type": "string",
+                    "value": "GET"
+                },
+                {
+                    "key": "otel.scope.name",
+                    "type": "string",
+                    "value": "org.springframework.boot"
+                },
+                {
+                    "key": "otel.scope.version",
+                    "type": "string",
+                    "value": "3.3.5"
+                },
+                {
+                    "key": "outcome",
+                    "type": "string",
+                    "value": "SUCCESS"
+                },
+                {
+                    "key": "span.kind",
+                    "type": "string",
+                    "value": "server"
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "value": "200"
+                },
+                {
+                    "key": "uri",
+                    "type": "string",
+                    "value": "/service-b/path1"
+                }
+            ],
+            "logs": [],
+            "processID": "p1",
+            "warnings": null
+        },
+        {
+            "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+            "spanID": "f0b22692b9603d99",
+            "operationName": "http get",
+            "references": [
+                {
+                    "refType": "CHILD_OF",
+                    "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+                    "spanID": "718269730cf1c150"
+                }
+            ],
+            "startTime": 1741865437871830,
+            "duration": 23965,
+            "tags": [
+                {
+                    "key": "client.name",
+                    "type": "string",
+                    "value": "service-b"
+                },
+                {
+                    "key": "exception",
+                    "type": "string",
+                    "value": "none"
+                },
+                {
+                    "key": "http.url",
+                    "type": "string",
+                    "value": "http://service-b:9091/service-b/path1"
+                },
+                {
+                    "key": "method",
+                    "type": "string",
+                    "value": "GET"
+                },
+                {
+                    "key": "otel.scope.name",
+                    "type": "string",
+                    "value": "org.springframework.boot"
+                },
+                {
+                    "key": "otel.scope.version",
+                    "type": "string",
+                    "value": "3.3.5"
+                },
+                {
+                    "key": "outcome",
+                    "type": "string",
+                    "value": "SUCCESS"
+                },
+                {
+                    "key": "span.kind",
+                    "type": "string",
+                    "value": "client"
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "value": "200"
+                },
+                {
+                    "key": "uri",
+                    "type": "string",
+                    "value": "/service-b/path1"
+                }
+            ],
+            "logs": [],
+            "processID": "p2",
+            "warnings": null
+        },
+        {
+            "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+            "spanID": "718269730cf1c150",
+            "operationName": "http get /service-a/path1",
+            "references": [],
+            "startTime": 1741865437869419,
+            "duration": 28933,
+            "tags": [
+                {
+                    "key": "exception",
+                    "type": "string",
+                    "value": "none"
+                },
+                {
+                    "key": "http.url",
+                    "type": "string",
+                    "value": "/service-a/path1"
+                },
+                {
+                    "key": "method",
+                    "type": "string",
+                    "value": "GET"
+                },
+                {
+                    "key": "otel.scope.name",
+                    "type": "string",
+                    "value": "org.springframework.boot"
+                },
+                {
+                    "key": "otel.scope.version",
+                    "type": "string",
+                    "value": "3.3.5"
+                },
+                {
+                    "key": "outcome",
+                    "type": "string",
+                    "value": "SUCCESS"
+                },
+                {
+                    "key": "span.kind",
+                    "type": "string",
+                    "value": "server"
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "value": "200"
+                },
+                {
+                    "key": "uri",
+                    "type": "string",
+                    "value": "/service-a/path1"
+                }
+            ],
+            "logs": [],
+            "processID": "p2",
+            "warnings": null
+        },
+        {
+            "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+            "spanID": "fd5f1c4f34d437d1",
+            "operationName": "http get /service-e/path1",
+            "references": [
+                {
+                    "refType": "CHILD_OF",
+                    "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+                    "spanID": "f43000765bb05391"
+                }
+            ],
+            "startTime": 1741865437885301,
+            "duration": 5000,
+            "tags": [
+                {
+                    "key": "exception",
+                    "type": "string",
+                    "value": "none"
+                },
+                {
+                    "key": "http.url",
+                    "type": "string",
+                    "value": "/service-e/path1"
+                },
+                {
+                    "key": "method",
+                    "type": "string",
+                    "value": "GET"
+                },
+                {
+                    "key": "otel.scope.name",
+                    "type": "string",
+                    "value": "org.springframework.boot"
+                },
+                {
+                    "key": "otel.scope.version",
+                    "type": "string",
+                    "value": "3.3.5"
+                },
+                {
+                    "key": "outcome",
+                    "type": "string",
+                    "value": "SUCCESS"
+                },
+                {
+                    "key": "span.kind",
+                    "type": "string",
+                    "value": "server"
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "value": "200"
+                },
+                {
+                    "key": "uri",
+                    "type": "string",
+                    "value": "/service-e/path1"
+                }
+            ],
+            "logs": [],
+            "processID": "p3",
+            "warnings": null
+        },
+        {
+            "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+            "spanID": "f43000765bb05391",
+            "operationName": "http get",
+            "references": [
+                {
+                    "refType": "CHILD_OF",
+                    "traceID": "8426ac22e3954ab0f012b9320f4b9ae3",
+                    "spanID": "9016af50612c992f"
+                }
+            ],
+            "startTime": 1741865437878863,
+            "duration": 13590,
+            "tags": [
+                {
+                    "key": "client.name",
+                    "type": "string",
+                    "value": "service-e"
+                },
+                {
+                    "key": "exception",
+                    "type": "string",
+                    "value": "none"
+                },
+                {
+                    "key": "http.url",
+                    "type": "string",
+                    "value": "http://service-e:9094/service-e/path1"
+                },
+                {
+                    "key": "method",
+                    "type": "string",
+                    "value": "GET"
+                },
+                {
+                    "key": "otel.scope.name",
+                    "type": "string",
+                    "value": "org.springframework.boot"
+                },
+                {
+                    "key": "otel.scope.version",
+                    "type": "string",
+                    "value": "3.3.5"
+                },
+                {
+                    "key": "outcome",
+                    "type": "string",
+                    "value": "SUCCESS"
+                },
+                {
+                    "key": "span.kind",
+                    "type": "string",
+                    "value": "client"
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "value": "200"
+                },
+                {
+                    "key": "uri",
+                    "type": "string",
+                    "value": "/service-e/path1"
+                }
+            ],
+            "logs": [],
+            "processID": "p1",
+            "warnings": null
+        }
+    ],
+    "processes": {
+        "p1": {
+            "serviceName": "service-b",
+            "tags": [
+                {
+                    "key": "telemetry.sdk.language",
+                    "type": "string",
+                    "value": "java"
+                },
+                {
+                    "key": "telemetry.sdk.name",
+                    "type": "string",
+                    "value": "opentelemetry"
+                },
+                {
+                    "key": "telemetry.sdk.version",
+                    "type": "string",
+                    "value": "1.37.0"
+                }
+            ]
+        },
+        "p2": {
+            "serviceName": "service-a",
+            "tags": [
+                {
+                    "key": "telemetry.sdk.language",
+                    "type": "string",
+                    "value": "java"
+                },
+                {
+                    "key": "telemetry.sdk.name",
+                    "type": "string",
+                    "value": "opentelemetry"
+                },
+                {
+                    "key": "telemetry.sdk.version",
+                    "type": "string",
+                    "value": "1.37.0"
+                }
+            ]
+        },
+        "p3": {
+            "serviceName": "service-e",
+            "tags": [
+                {
+                    "key": "telemetry.sdk.language",
+                    "type": "string",
+                    "value": "java"
+                },
+                {
+                    "key": "telemetry.sdk.name",
+                    "type": "string",
+                    "value": "opentelemetry"
+                },
+                {
+                    "key": "telemetry.sdk.version",
+                    "type": "string",
+                    "value": "1.37.0"
+                }
+            ]
+        }
+    },
+    "warnings": null
+}

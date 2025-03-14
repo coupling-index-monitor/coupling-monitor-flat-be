@@ -2,8 +2,61 @@ import networkx as nx
 from networkx.readwrite import json_graph
 from app.core.database import db_manager
 
+def generate_weighted_graph(traces, weight_type="frequency"):
+    """
+    Generate a weighted dependency graph from new traces.
+    """
+    graph = nx.DiGraph()
+    edge_weights = {}
 
-def generate_weighted_graph_from_traces(traces):
+    for trace in traces:
+        processes = trace.get("processes", {})
+        spans = trace.get("spans", [])
+
+        # Map process IDs to service names
+        process_to_service = {pid: details["serviceName"] for pid, details in processes.items()}
+
+        # Process spans to build relationships
+        for span in spans:
+            process_id = span.get("processID")
+            duration = span.get("duration", 0) / 1_000
+            parent_span_id = None
+            for ref in span.get("references", []):
+                if ref["refType"] == "CHILD_OF":
+                    parent_span_id = ref["spanID"]
+                    break
+
+            child_service = None
+            parent_service = None
+            if (parent_span_id) and (process_id in process_to_service):
+                child_service = process_to_service[process_id]
+                parent_span = next((s for s in spans if s["spanID"] == parent_span_id), None)
+                if (parent_span) and (parent_span["processID"] in process_to_service):
+                    parent_service = process_to_service[parent_span["processID"]]
+
+                    # Skip self-loops
+                    if parent_service != child_service:
+                        if (parent_service, child_service) in edge_weights:
+                            edge_weights[(parent_service, child_service)]["count"] += 1
+                            edge_weights[(parent_service, child_service)]["latencies"].append(duration)
+                        else:
+                            edge_weights[(parent_service, child_service)] = {"count": 1, "latencies": [duration]}
+
+    # Assign weights to graph edges based on the chosen weight_type
+    for (source, destination), data in edge_weights.items():
+        avg_latency = sum(data["latencies"]) / len(data["latencies"])
+        if weight_type == "frequency":
+            graph.add_edge(source, destination, weight=data["count"])
+        elif weight_type == "latency":
+            graph.add_edge(source, destination, weight=avg_latency)
+        graph[source][destination]["latency"] = avg_latency  # Store avg latency as an additional attribute
+        graph[source][destination]["frequency"] = data["count"]  # Store count as an additional attribute
+
+
+    return json_graph.node_link_data(graph, edges="edges")
+
+
+def generate_flat_graph_from_traces(traces):
     """
     Generate a weighted dependency graph from new traces.
     """

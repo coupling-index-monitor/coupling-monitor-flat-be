@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import db_manager
-from app.core.scheduler import start_scheduler, stop_scheduler
+# from app.core.scheduler import start_scheduler, stop_scheduler
 from app.routers import traces_router, graphs_router, services_router, coupling_router
 
 app = FastAPI(title="Graph Generator")
@@ -31,12 +31,12 @@ async def startup():
     # start_scheduler()
 
 
-@app.on_event("shutdown")
-async def shutdown():
-    print("Shutting down: Closing database connection...")
-    await db_manager.close_mongo()
-    db_manager.close_neo4j()
-    # stop_scheduler()
+# @app.on_event("shutdown")
+# async def shutdown():
+#     print("Shutting down: Closing database connection...")
+#     await db_manager.close_mongo()
+#     db_manager.close_neo4j()
+#     # stop_scheduler()
 
 
 @app.get("/")

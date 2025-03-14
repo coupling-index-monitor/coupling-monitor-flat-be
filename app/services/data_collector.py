@@ -171,30 +171,57 @@ def fetch_and_store_traces_for_all_services():
             print(f"No new traces for service: {service}. Moving to the next service.")
 
 
-def get_all_the_traces(batch_size=100):
+def get_traces_within_timerange(start_us, end_us, batch_size=100, page=1):
     """
-    Retrieve all traces from the MongoDB traces collection.
+    Retrieve traces from the MongoDB traces collection within a given time range and with pagination.
     Args:
+        start_us (int): Start time in microseconds.
+        end_us (int): End time in microseconds.
         batch_size (int): Number of traces to fetch per batch to avoid memory issues.
+        page (int): Page number for pagination.
     Returns:
-        list: List of all trace documents in the database.
+        list: List of trace documents within the specified time range.
     """
-    print("Trying to retrieve the traces")
+    print(f"Retrieving traces from {start_us} to {end_us}, page {page}")
     try:
         traces_collection = db_manager.get_trace_collection()
-        all_traces = []
-        skip_count = 0
+        skip_count = (page - 1) * batch_size
 
-        # Use a loop to fetch in batches
-        while True:
-            batch = list(traces_collection.find({}, {"_id": 0}).skip(skip_count).limit(batch_size))
-            if not batch:
-                break  # Exit when no more documents are found
-            all_traces.extend(batch)
-            skip_count += batch_size
+        # Query to fetch traces within the specified time range
+        query = {
+            "spans": {
+                "$elemMatch": {
+                    "startTime": {
+                    "$gte": int(start_us),
+                    "$lte": int(end_us)
+                    }
+                }
+            }
+        }
 
-        print(f"Retrieved {len(all_traces)} traces from the database.")
-        return all_traces
+        # Fetch the total count of documents matching the query
+        total_count = traces_collection.count_documents(query)
+        total_pages = (total_count + batch_size - 1) // batch_size 
+        print(f"Total traces: {total_count}, Total pages: {total_pages}")
+
+        # Fetch the traces with pagination
+        traces = list(traces_collection.find(query).skip(skip_count).limit(batch_size))
+
+        # Prepare the paginated response
+        response = {
+            "total_count": total_count,
+            "total_pages": total_pages,
+            "current_page": page,
+            "page_size": batch_size,
+            "traces": traces
+        }
+        return response
+
+        # Fetch the traces with pagination
+        traces = list(traces_collection.find(query, {"_id": 0}).skip(skip_count).limit(batch_size))
+
+        print(f"Retrieved {len(traces)} traces from the database.")
+        return traces
     except Exception as e:
         print(f"Error fetching traces: {e}")
         return None
