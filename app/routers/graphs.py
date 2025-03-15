@@ -1,13 +1,17 @@
 from fastapi import APIRouter
 from datetime import datetime, timedelta
-from app.services.graph_processor import (
+from app.services import (
+    generate_graph_with_edge_weights, 
+    fetch_new_traces_since_last_sync, 
+    update_last_sync_date, 
+    get_traces_within_timerange, 
+    get_traces_from_files_within_timerange,    
     generate_flat_graph_from_traces,
     update_graph_in_neo4j,
     get_graph_data_as_json,
     generate_weighted_graph
 )
-from app.services.graph_updater import fetch_new_traces_since_last_sync, update_last_sync_date
-from app.services.data_collector import get_traces_within_timerange, get_traces_from_files_within_timerange
+from app.utils.constants import WEIGHT_TYPES
 
 router = APIRouter()
 
@@ -42,7 +46,7 @@ async def get_weighted_dependency_graph(weight_type: str = "L", start_time: int 
     Endpoint to generate and return the weighted dependency graph from the traces of a given time range.
     """
     try:
-        if weight_type not in ("L", "F"):
+        if weight_type not in WEIGHT_TYPES.__members__.values():
             return {"status": "error", "message": "Invalid weight_type parameter."}
         if start_time != 0 and end_time != 0 and start_time >= end_time:
             return {"status": "error", "message": "Invalid time range."}
@@ -77,13 +81,13 @@ async def get_weighted_dependency_graph(weight_type: str = "L", start_time: int 
         print(f"ERROR: Failed to generate weighted graph: {str(e)}")
         return {"status": "error", "message": f"Failed to update graph: {str(e)}"}
     
-@router.get("/weighted")
-async def get_weighted_dependency_graph(weight_type: str = "L", start_time: int = 0, end_time: int = 0):
+@router.get("/edge-weight")
+async def get_weighted_dependency_graph_from_files(weight_type: str = "CO", start_time: int = 0, end_time: int = 0):
     """
     Endpoint to generate and return the weighted dependency graph from the traces of a given time range.
     """
     try:
-        if weight_type not in ("L", "F"):
+        if weight_type not in WEIGHT_TYPES.__members__.values().__str__():
             return {"status": "error", "message": "Invalid weight_type parameter."}
         if start_time != 0 and end_time != 0 and start_time >= end_time:
             return {"status": "error", "message": "Invalid time range."}
@@ -93,23 +97,24 @@ async def get_weighted_dependency_graph(weight_type: str = "L", start_time: int 
         if end_time == 0:
             end_time = int(datetime.now().timestamp() * 1_000_000)
             
-        print(f"Generating weighted dependency graph with weight_type={weight_type}, start_time={datetime.fromtimestamp(start_time / 1_000_000)}, end_time={datetime.fromtimestamp(end_time / 1_000_000)}")
+        print(f"Generating weighted dependency graph with weight_type={weight_type}, "
+              f"start_time={datetime.fromtimestamp(start_time / 1_000_000)}, end_time={datetime.fromtimestamp(end_time / 1_000_000)}")
         
         traces = get_traces_from_files_within_timerange(start_time, end_time)
         if not traces:
             return {"status": "success", "message": "No traces to process."}
 
-        graph_data = generate_weighted_graph(traces, "latency" if weight_type == "L" else "frequency")
+        graph_data = generate_graph_with_edge_weights(traces, WEIGHT_TYPES(weight_type).value)
         
         return {
             "status": "success", 
             "message": "Weighted Dependency graph generated successfully.", 
-            "weight_type": "latency" if weight_type == "L" else "frequency",
+            "weight_type": WEIGHT_TYPES(weight_type).name,
             "data": graph_data
         }
     except Exception as e:
         print(f"ERROR: Failed to generate weighted graph: {str(e)}")
-        return {"status": "error", "message": f"Failed to update graph: {str(e)}"}
+        return {"status": "error", "message": f"Failed to generate graph: {str(e)}"}
 
 @router.get("/")
 async def fetch_dependency_graph():

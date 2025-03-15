@@ -39,8 +39,8 @@ class DatabaseManager:
             self.trace_updates = db["trace_updates"]
             self.trace_collection_updates = db["trace_collection_updates"]
 
-            print(f"MongoDB connected successfully. Collections initialized: "
-                  f"trace_collection={self.trace_collection}, trace_updates={self.trace_updates}")
+            print(f"MongoDB connected successfully. Collections initialized: ")
+                #   f"trace_collection={self.trace_collection}, trace_updates={self.trace_updates}")
         except ConnectionFailure as e:
             print(f"MongoDB connection failed: {e}")
             raise e
