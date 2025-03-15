@@ -50,3 +50,5 @@ staticfiles/
 
 # Pytest cache
 .cache/
+
+traces/

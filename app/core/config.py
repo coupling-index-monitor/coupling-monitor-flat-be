@@ -19,5 +19,7 @@ class Settings:
 
     JAEGER_URL: str = os.getenv("JAEGER_URL")
 
+    TRACES_DIR: str = "traces"
+
 
 settings = Settings()

@@ -1,3 +1,6 @@
+import json
+import os
+
 import requests
 from datetime import datetime, timezone, timedelta
 from pymongo import errors
@@ -206,6 +209,7 @@ def get_traces_within_timerange(start_us, end_us, batch_size=100, page=1):
 
         # Fetch the traces with pagination
         traces = list(traces_collection.find(query).skip(skip_count).limit(batch_size))
+        print(f"Retrieved {len(traces)} traces from the database.")
 
         # Prepare the paginated response
         response = {
@@ -216,12 +220,45 @@ def get_traces_within_timerange(start_us, end_us, batch_size=100, page=1):
             "traces": traces
         }
         return response
+    except Exception as e:
+        print(f"Error fetching traces: {e}")
+        return None
 
-        # Fetch the traces with pagination
-        traces = list(traces_collection.find(query, {"_id": 0}).skip(skip_count).limit(batch_size))
+def get_traces_from_files_within_timerange(start_us, end_us):
+    """
+    Retrieve traces from the MongoDB traces collection within a given time range and with pagination.
+    Args:
+        start_us (int): Start time in microseconds.
+        end_us (int): End time in microseconds.
+    Returns:
+        list: List of trace documents within the specified time range.
+    """
+    print(f"Retrieving traces from {start_us} to {end_us}")
+    try:
+        trace_files = [f for f in os.listdir(settings.TRACES_DIR) if f.endswith('.json') and f != 'offset.json']
 
-        print(f"Retrieved {len(traces)} traces from the database.")
-        return traces
+        # Filter files within the specified time range based on their names
+        filtered_files = [
+            f for f in trace_files
+            if int(f.split('_')[0]) >= int(start_us) and int(f.split('_')[1].split('.')[0]) <= int(end_us)
+        ]
+
+        # Initialize an empty list to store all traces
+        all_traces = []
+
+        for trace_file in filtered_files:
+            with open(os.path.join(settings.TRACES_DIR, trace_file), 'r') as file:
+                traces = json.load(file)
+                all_traces.extend(traces)
+
+        # Filter traces within the specified time range
+        filtered_traces = [
+            trace for trace in all_traces
+            if any(int(start_us) <= span["startTime"] <= int(end_us) for span in trace["spans"])
+        ]
+        print(f"Retrieved {len(filtered_traces)} traces from the JSON files.")
+
+        return filtered_traces
     except Exception as e:
         print(f"Error fetching traces: {e}")
         return None
