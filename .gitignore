@@ -52,3 +52,4 @@ staticfiles/
 .cache/
 
 traces/
+traces_*/

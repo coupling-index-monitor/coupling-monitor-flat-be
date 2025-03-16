@@ -26,8 +26,8 @@ app.include_router(coupling_router, prefix="/api/coupling", tags=["Coupling"])
 @app.on_event("startup")
 async def startup():
     print("Starting up: Initializing database connection...")
-    # await db_manager.initialize_mongo()
-    # db_manager.initialize_neo4j()
+    await db_manager.initialize_mongo()
+    db_manager.initialize_neo4j()
     # start_scheduler()
 
 
