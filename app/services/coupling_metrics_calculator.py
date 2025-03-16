@@ -34,9 +34,7 @@ def calculate_ais(service_name, graph_data):
     for link in links:
         if link["target"] == service_name:
             consumers.add(link["source"])
-    
-    # Return the count of unique consumers
-    return len(consumers)
+    ais = len(consumers)
 
 
 def calculate_all_ais(graph_data):

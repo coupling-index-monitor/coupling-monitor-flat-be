@@ -2,7 +2,7 @@ import networkx as nx
 from networkx.readwrite import json_graph
 from app.utils.constants import WEIGHT_TYPES
 
-def generate_graph_with_edge_weights(traces, weight_type):
+def generate_graph_with_edge_weights(traces, wedge_weight_type):
     """
     Generate a weighted dependency graph from new traces with co-execution edge weights.
     """
@@ -36,14 +36,10 @@ def generate_graph_with_edge_weights(traces, weight_type):
                 if (parent_span) and (parent_span["processID"] in process_to_service):
                     parent_service = process_to_service[parent_span["processID"]]
 
-                    if parent_service not in execution_sets:
-                        execution_sets[parent_service] = set()
-                    execution_sets[parent_service].add(trace_id)
+                    add_trace_to_execution_sets(execution_sets, trace_id, parent_service)
 
                     if parent_service != child_service: # Skip self-loops 
-                        if child_service not in execution_sets:
-                            execution_sets[child_service] = set()
-                        execution_sets[child_service].add(trace_id)
+                        add_trace_to_execution_sets(execution_sets, trace_id, child_service)
                         
                         if (parent_service, child_service) in edge_weights:
                             edge_weights[(parent_service, child_service)]["count"] += 1
@@ -51,25 +47,53 @@ def generate_graph_with_edge_weights(traces, weight_type):
                         else:
                             edge_weights[(parent_service, child_service)] = {"count": 1, "latencies": [duration]}
 
-    # Assign weights to graph edges based on the chosen weight_type
+    # Assign weights to graph edges based on the chosen wedge_weight_type
+    graph = assign_edge_weights(wedge_weight_type, graph, edge_weights, execution_sets)
+
+    # Calculate node weights and add nodes to the graph
+    nodes = calculate_node_weights(graph)
+    graph.add_nodes_from(nodes.items())
+
+    return json_graph.node_link_data(graph, edges="edges")
+
+def calculate_node_weights(graph):
+    nodes = {}
+    for service_node in graph.nodes:
+        consumers = set(graph.predecessors(service_node))
+        absolute_importance = len(consumers)
+
+        dependencies = set(graph.successors(service_node))
+        absolute_dependence = len(dependencies)
+
+        nodes[service_node] = {
+            "absolute_importance": absolute_importance,
+            "absolute_dependence": absolute_dependence
+        }
+    return nodes
+
+def assign_edge_weights(wedge_weight_type, graph, edge_weights, execution_sets):
     for (source, destination), data in edge_weights.items():
         avg_latency = round(sum(data["latencies"]) / len(data["latencies"]), 4)
         co_execution_weight = compute_jaccard_similarity(execution_sets, source, destination)
 
         # Assign edge weights
-        if weight_type == WEIGHT_TYPES.Frequency.value:
+        if wedge_weight_type == WEIGHT_TYPES.Frequency.value:
             graph.add_edge(source, destination, weight=data["count"])
-        elif weight_type == WEIGHT_TYPES.Latency.value:
+        elif wedge_weight_type == WEIGHT_TYPES.Latency.value:
             graph.add_edge(source, destination, weight=avg_latency)
-        elif weight_type == WEIGHT_TYPES.CoExecution.value:
+        elif wedge_weight_type == WEIGHT_TYPES.CoExecution.value:
             graph.add_edge(source, destination, weight=co_execution_weight)
 
         # Store additional attributes
         graph[source][destination]["latency(ms)"] = avg_latency
         graph[source][destination]["frequency"] = data["count"]
         graph[source][destination]["co_execution"] = co_execution_weight
+    return graph
 
-    return json_graph.node_link_data(graph, edges="edges")
+def add_trace_to_execution_sets(execution_sets, trace_id, parent_service):
+    if parent_service not in execution_sets:
+        execution_sets[parent_service] = set()
+    execution_sets[parent_service].add(trace_id)
 
 def compute_jaccard_similarity(execution_sets, source, destination):
     executions_source = execution_sets.get(source, set())
