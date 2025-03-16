@@ -1,6 +1,5 @@
 import networkx as nx
 from networkx.readwrite import json_graph
-
 from app.utils.constants import WEIGHT_TYPES
 
 def generate_graph_with_edge_weights(traces, weight_type):
@@ -12,22 +11,14 @@ def generate_graph_with_edge_weights(traces, weight_type):
     execution_sets = {}
 
     for trace in traces:
-        trace_id = trace.get("traceID")  # Use traceID as execution identifier
+        trace_id = trace.get("traceID") 
         processes = trace.get("processes", {})
         spans = trace.get("spans", [])
 
         # Map process IDs to service names
         process_to_service = {pid: details["serviceName"] for pid, details in processes.items()}
 
-        # Track which executions include each service
-        for span in spans:
-            service_name = process_to_service.get(span["processID"])
-            if service_name:
-                if service_name not in execution_sets:
-                    execution_sets[service_name] = set()
-                execution_sets[service_name].add(trace_id)  # Add trace execution ID
-
-        # Process spans to build relationships
+        # Process spans to build relationships & Track which executions include each service
         for span in spans:
             process_id = span.get("processID")
             duration = span.get("duration", 0) / 1_000  # Convert to milliseconds
@@ -45,8 +36,15 @@ def generate_graph_with_edge_weights(traces, weight_type):
                 if (parent_span) and (parent_span["processID"] in process_to_service):
                     parent_service = process_to_service[parent_span["processID"]]
 
-                    # Skip self-loops
-                    if parent_service != child_service:
+                    if parent_service not in execution_sets:
+                        execution_sets[parent_service] = set()
+                    execution_sets[parent_service].add(trace_id)
+
+                    if parent_service != child_service: # Skip self-loops 
+                        if child_service not in execution_sets:
+                            execution_sets[child_service] = set()
+                        execution_sets[child_service].add(trace_id)
+                        
                         if (parent_service, child_service) in edge_weights:
                             edge_weights[(parent_service, child_service)]["count"] += 1
                             edge_weights[(parent_service, child_service)]["latencies"].append(duration)
@@ -67,7 +65,7 @@ def generate_graph_with_edge_weights(traces, weight_type):
             graph.add_edge(source, destination, weight=co_execution_weight)
 
         # Store additional attributes
-        graph[source][destination]["latency"] = avg_latency
+        graph[source][destination]["latency(ms)"] = avg_latency
         graph[source][destination]["frequency"] = data["count"]
         graph[source][destination]["co_execution"] = co_execution_weight
 

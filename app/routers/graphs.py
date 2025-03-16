@@ -80,7 +80,8 @@ async def get_weighted_dependency_graph(weight_type: str = "L", start_time: int 
     except Exception as e:
         print(f"ERROR: Failed to generate weighted graph: {str(e)}")
         return {"status": "error", "message": f"Failed to update graph: {str(e)}"}
-    
+
+
 @router.get("/edge-weight")
 async def get_weighted_dependency_graph_from_files(weight_type: str = "CO", start_time: int = 0, end_time: int = 0):
     """
@@ -115,6 +116,7 @@ async def get_weighted_dependency_graph_from_files(weight_type: str = "CO", star
     except Exception as e:
         print(f"ERROR: Failed to generate weighted graph: {str(e)}")
         return {"status": "error", "message": f"Failed to generate graph: {str(e)}"}
+
 
 @router.get("/")
 async def fetch_dependency_graph():
