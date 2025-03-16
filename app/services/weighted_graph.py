@@ -59,9 +59,11 @@ def generate_graph_with_edge_weights(traces, wedge_weight_type):
 def calculate_node_weights(graph):
     nodes = {}
     for service_node in graph.nodes:
+        #calculates the number of nodes invoke the service_node 
         consumers = set(graph.predecessors(service_node))
         absolute_importance = len(consumers)
 
+        #calculates the number of nodes the service_node invokes
         dependencies = set(graph.successors(service_node))
         absolute_dependence = len(dependencies)
 
@@ -72,6 +74,15 @@ def calculate_node_weights(graph):
     return nodes
 
 def assign_edge_weights(wedge_weight_type, graph, edge_weights, execution_sets):
+    """
+    Assigns weights to the edges of a graph based on the specified weight type.
+
+    Returns:
+    networkx.Graph: The graph with updated edge weights and additional attributes:
+                    - "latency(ms)": The average latency of the edge in milliseconds.
+                    - "frequency": The frequency count of the edge.
+                    - "co_execution": The co-execution weight of the edge.
+    """
     for (source, destination), data in edge_weights.items():
         avg_latency = round(sum(data["latencies"]) / len(data["latencies"]), 4)
         co_execution_weight = compute_jaccard_similarity(execution_sets, source, destination)
@@ -96,6 +107,27 @@ def add_trace_to_execution_sets(execution_sets, trace_id, parent_service):
     execution_sets[parent_service].add(trace_id)
 
 def compute_jaccard_similarity(execution_sets, source, destination):
+    """
+    Compute the Jaccard similarity between two sets of executions.
+
+    The Jaccard similarity is defined as the size of the intersection divided by the size of the union of the sets.
+
+    Args:
+        execution_sets (dict): A dictionary where keys are nodes and values are sets of executions.
+        source (str): The source node for which to compute the similarity.
+        destination (str): The destination node for which to compute the similarity.
+
+    Returns:
+        float: The Jaccard similarity coefficient between the source and destination nodes, rounded to 4 decimal places.
+
+    Example:
+        execution_sets = {
+            'A': {'exec1', 'exec2', 'exec3'},
+            'B': {'exec2', 'exec3', 'exec4'}
+        }
+        similarity = compute_jaccard_similarity(execution_sets, 'A', 'B')
+        print(similarity)  # Output: 0.5
+    """
     executions_source = execution_sets.get(source, set())
     executions_destination = execution_sets.get(destination, set())
     intersection_size = len(executions_source & executions_destination)
